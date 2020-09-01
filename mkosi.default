@@ -1,0 +1,30 @@
+# This is the main configuration file.
+
+[Distribution]
+Distribution=ubuntu
+# 20.04 = focal
+Release=focal
+
+
+[Output]
+Format=gpt_ext4
+Bootable=yes
+Hostname=thegrid
+
+
+[Partitions]
+RootSize=5G
+
+
+[Packages]
+# The packages to appear in the final image
+Packages=nano less tmux ssh dnsutils curl
+
+# let mkosi.postinst access the internet
+# (needed because we are updating and installing packages there)
+WithNetwork=yes
+
+
+[Validation]
+# root password
+Password=mementomori

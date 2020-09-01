@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# From http://0pointer.net/blog/mkosi-a-tool-for-generating-os-images.html:
+# mkosi.postinst — If this executable script exists, it is invoked inside the
+# image (inside a systemd-nspawn invocation) and can adjust the image as it
+# likes at a very late point in the image preparation. If mkosi.build exists,
+# i.e. the dual-phased development build process used, then this script will be
+# invoked twice: once inside the build image and once inside the final image.
+# The first parameter passed to the script clarifies which phase it is run in.
+
+# don't ask me any questions, apt
+export DEBIAN_FRONTEND=noninteractive
+
+# create a regular user named "krystof"
+useradd krystof -s /bin/bash -m
+
+# set the password for the new user
+echo krystof:krystof | chpasswd
+
+
+# ---------------------------- install updates ---------------------------------
+echo -e "\n\nInstalling updates...\n"
+
+# add package repository for updates to sources list
+add-apt-repository "deb http://archive.ubuntu.com/ubuntu focal-updates main universe"
+
+# update package lists
+apt-get -y update
+
+# install updates
+apt-get -y upgrade
+
+
+# ----------------------------- install Docker ---------------------------------
+# from https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+echo -e "\n\nInstalling Docker...\n"
+
+# get the docker GPG key
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+# add the docker package repository
+add-apt-repository \
+  "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) \
+  stable"
+
+# update package lists and install docker
+apt-get -y update
+apt-get -y install docker-ce docker-ce-cli containerd.io
+
+# allow running docker as a non-root user
+groupadd docker
+usermod -aG docker krystof
+
+
+# ---------------------------- clean up ----------------------------------------
+# change the owner (+group) of everything in /home/krystof to be krystof:krystof
+chown -hR krystof:krystof /home/krystof/*
+chown -hR krystof:krystof /home/krystof/.*
+
+apt-get autoremove --purge

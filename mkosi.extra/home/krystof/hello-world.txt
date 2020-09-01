@@ -1,0 +1,3 @@
+Hello!
+
+This file was included in mkosi.extra, and copied by mkosi into the final image.
